@@ -16,7 +16,6 @@ public class WorkOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idOrder;
 
-    // Simplificamos los datos del cliente por ahora
     @Column(nullable = false)
     private String nameCliente;
 
@@ -30,12 +29,18 @@ public class WorkOrder {
     private String prioridad;
 
     @Column(nullable = false)
-    private String estado; // Ej. "PENDIENTE", "ASIGNADA", "CERRADA"
+    private String estado; // PENDIENTE, EN_PROGRESO, FINALIZADA
 
     @Column(length = 1000)
     private String descripcion;
     
-    // Spring se encargará de estas fechas automáticamente
+    // --- NUEVO: Relación con Técnico ---
+    // Muchas órdenes pueden pertenecer a un técnico
+    @ManyToOne
+    @JoinColumn(name = "id_tecnico_asignado") // Crea la llave foránea en BD
+    private Technician technician;
+    // -----------------------------------
+
     @CreationTimestamp
     private LocalDateTime fechaCreacion;
 
