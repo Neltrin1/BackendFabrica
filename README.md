@@ -103,7 +103,7 @@ Este proyecto es el entregable central para las siguientes materias de Ingenier�
 
 | Materia | Profesor |
 | :--- | :--- |
-| **Bases de Datos y Laboratorio** | John Jairo Prado Piedrahita |
+| **Bases de Datos y Laboratorio** | John Prado y Joaquín Molina |
 | **Arquitectura de Software** | Didier Correa Londoño |
 
 ### Integrantes del Equipo
