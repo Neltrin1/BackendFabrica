@@ -27,36 +27,28 @@ Este backend está construido sobre una arquitectura de **Monolito Modular** mod
 
 * **Framework:** Spring Boot 3.5.x
 * **Lenguaje:** Java 21
-* **Seguridad:** Spring Security + **JWT (JSON Web Tokens)** para autenticación stateless.
-* **Base de Datos:** Spring Data JPA / Hibernate.
-* **Persistencia (Dev):** H2 Database (En memoria) con **Triggers nativos en Java** para auditoría.
-* **Validación:** `jakarta.validation` para integridad de datos de entrada.
-* **Documentación API:** SpringDoc (OpenAPI 3 / Swagger UI).
-* **Build Tool:** Apache Maven.
-* **Calidad & Pruebas:** JUnit 5 + MockMvc (Pruebas de Integración).
-* **Monitoreo:** Spring Boot Actuator + Micrometer (métricas para Prometheus).
-* **Containerización:** Docker (Dockerfile optimizado multi-stage).
+* **Seguridad:** Spring Security (con hashing BCrypt)
+* **Base de Datos:** Spring Data JPA / Hibernate
+* [cite_start]**Base de Datos (Desarrollo):** H2 (En memoria) [cite: 310-311]
+* **Validación:** `jakarta.validation`
+* [cite_start]**Documentación API:** SpringDoc (OpenAPI 3 / Swagger) [cite: 312-313]
+* **Build:** Apache Maven
+* **Monitoreo:** Spring Boot Actuator + Micrometer (para Prometheus)
+* **Containerización:** Docker
 
 ---
 
-##  Cómo Ejecutar Localmente
-
-### Prerrequisitos
-* Java JDK 21 instalado.
-* Git instalado.
-* Docker (Opcional, si se desea desplegar en contenedor).
-
-### Pasos de Instalación
+## Cómo Ejecutar Localmente
 
 1.  **Clonar el repositorio:**
     ```sh
-    git clone [https://github.com/codeFactory20252Feature7/BackendFabrica.git](https://github.com/codeFactory20252Feature7/BackendFabrica.git)
+    git clone https://github.com/codeFactory20252Feature7/BackendFabrica.git
     cd BackendFabrica
     ```
 
-2.  **Ejecutar la aplicación (Usando Maven Wrapper):**
+2.  **Ejecutar la aplicación (con Maven Wrapper):**
     *En Windows:*
-    ```cmd
+    ```sh
     ./mvnw spring-boot:run
     ```
     *En macOS/Linux:*
@@ -64,67 +56,123 @@ Este backend está construido sobre una arquitectura de **Monolito Modular** mod
     ./mvnw spring-boot:run
     ```
 
-La aplicación iniciará y estará disponible en `http://localhost:8080`.
-
-> **Nota:** Al iniciar, el sistema cargará automáticamente un conjunto de datos de prueba (Seed Data) incluyendo usuarios, técnicos y órdenes de trabajo para facilitar la revisión.
+La aplicación estará disponible en `http://localhost:8080`.
 
 ---
 
-##  Seguridad y Autenticación (JWT)
+## Documentación y Endpoints de la API
 
-El sistema implementa seguridad avanzada. La mayoría de los endpoints están protegidos y requieren un Token válido.
+La documentación completa de la API se genera automáticamente con Swagger y está disponible una vez que la aplicación está en ejecución.
 
-1.  **Obtener Token:** Realice una petición `POST` a `/api/auth/login` con las credenciales de administrador (`admin@telconova.com` / `secret`).
-2.  **Usar Token:** En cada petición subsiguiente, incluya el encabezado:
-    `Authorization: Bearer <SU_TOKEN>`
+* **Interfaz de Swagger (UI):** `http://localhost:8080/swagger-ui.html`
+* **Definición OpenAPI (JSON):** `http://localhost:8080/v3/api-docs`
 
----
+### Endpoints Principales
 
-##  Documentación y Endpoints de la API
-
-La documentación interactiva completa (Swagger) está disponible en:
-* **Interfaz UI:** `http://localhost:8080/swagger-ui.html`
-* **Definición JSON:** `http://localhost:8080/v3/api-docs`
-
-### Catálogo de Servicios Principales
-
-#### 1. Autenticación (`/api/auth`)
-* `POST /register`: Registrar nuevos usuarios operadores.
-* `POST /login`: Autenticación y generación de Token JWT.
-
-#### 2. Gestión de Técnicos (`/api/technicians`)
-* `POST /create`: Registrar un nuevo técnico en el sistema.
-* `GET /all`: Listar la fuerza de trabajo disponible.
-
-#### 3. Órdenes de Trabajo (`/api/orders`) - *Core del Negocio*
-* `POST /`: Crear una nueva orden de servicio (Estado inicial: PENDIENTE).
-* `GET /`: Listar todas las órdenes (Dashboard administrativo).
-* `GET /{id}`: Consultar detalle de una orden específica.
-* `PUT /{orderId}/assign/{techId}`: Asignar un técnico a una orden (Cambia estado a ASIGNADA).
-* `PATCH /{orderId}/status`: Actualizar el ciclo de vida (EN_PROGRESO, FINALIZADA).
+* `POST /api/auth/register`: Registra un nuevo usuario (`User`).
+* `POST /api/auth/login`: Autentica un usuario.
+* `POST /api/technicians/create`: Crea un nuevo técnico (`Technician`).
+* `GET /api/technicians/all`: Lista todos los técnicos.
+* `POST /api/orders`: (Nuevo) Crea una nueva orden de trabajo (`WorkOrder`).
 
 ---
 
-##  Base de Datos y Auditoría
+## Despliegue con Docker
 
-El sistema utiliza una base de datos H2 embebida para desarrollo ágil.
+El proyecto incluye un `Dockerfile` optimizado (multi-etapa) para crear una imagen de producción ligera.
 
-* **Consola de Administración:** `http://localhost:8080/h2-console`
-  * **JDBC URL:** `jdbc:h2:mem:demo`
-  * **User:** `sa`
-  * **Password:** (Dejar vacío)
+1.  **Construir la imagen de Docker:**
+    ```sh
+    docker build -t telconova-backend .
+    ```
 
-### Características Avanzadas de BD
-* **Relaciones:** Integridad referencial entre Órdenes y Técnicos.
-* **Auditoría (Triggers):** Se implementó un Trigger nativo (`AuditTrigger`) que intercepta actualizaciones en la tabla `work_orders` y registra automáticamente cualquier cambio de estado en la tabla histórica `auditoria_ordenes`.
+2.  **Ejecutar el contenedor:**
+    ```sh
+    docker run -p 8080:8080 telconova-backend
+    ```# Backend del Proyecto: TelcoNova SupportSuite
+
+Este repositorio contiene el código fuente del servicio backend para el proyecto **TelcoNova SupportSuite**, desarrollado como parte de la iniciativa Fábrica Escuela.
+
+El objetivo de este backend es proveer una API RESTful robusta para gestionar el registro, asignación y seguimiento de órdenes de trabajo de soporte técnico.
 
 ---
 
-##  Despliegue con Docker
+## Contexto Académico (Fábrica Escuela 2025-2)
 
-El proyecto incluye configuración lista para despliegue en contenedores, ideal para entornos de CI/CD.
+Este proyecto es el entregable central para las siguientes materias de Ingeniería de Sistemas en la Universidad de Antioquia:
 
-1.  **Construir la imagen:**
+| Materia | Profesor |
+| :--- | :--- |
+| **Bases de Datos y Laboratorio** | John Jairo Prado Piedrahita |
+| **Arquitectura de Software** | Didier Correa Londoño |
+
+### Integrantes del Equipo
+* Cristian David Diez Lopez
+* Roller Andrés Hernández López
+
+---
+
+## Stack Tecnológico
+
+Este backend está construido con una arquitectura moderna de Java, enfocada en la mantenibilidad y el despliegue.
+
+* **Framework:** Spring Boot 3
+* **Lenguaje:** Java 21
+* **Seguridad:** Spring Security (con hashing BCrypt)
+* **Base de Datos:** Spring Data JPA / Hibernate
+* [cite_start]**Base de Datos (Desarrollo):** H2 (En memoria) [cite: 310-311]
+* **Validación:** `jakarta.validation`
+* [cite_start]**Documentación API:** SpringDoc (OpenAPI 3 / Swagger) [cite: 312-313]
+* **Build:** Apache Maven
+* **Monitoreo:** Spring Boot Actuator + Micrometer (para Prometheus)
+* **Containerización:** Docker
+
+---
+
+## Cómo Ejecutar Localmente
+
+1.  **Clonar el repositorio:**
+    ```sh
+    git clone [https://github.com/codeFactory20252Feature7/BackendFabrica.git](https://github.com/codeFactory20252Feature7/BackendFabrica.git)
+    cd BackendFabrica
+    ```
+
+2.  **Ejecutar la aplicación (con Maven Wrapper):**
+    *En Windows:*
+    ```sh
+    ./mvnw spring-boot:run
+    ```
+    *En macOS/Linux:*
+    ```sh
+    ./mvnw spring-boot:run
+    ```
+
+La aplicación estará disponible en `http://localhost:8080`.
+
+---
+
+## Documentación y Endpoints de la API
+
+La documentación completa de la API se genera automáticamente con Swagger y está disponible una vez que la aplicación está en ejecución.
+
+* **Interfaz de Swagger (UI):** `http://localhost:8080/swagger-ui.html`
+* **Definición OpenAPI (JSON):** `http://localhost:8080/v3/api-docs`
+
+### Endpoints Principales
+
+* `POST /api/auth/register`: Registra un nuevo usuario (`User`).
+* `POST /api/auth/login`: Autentica un usuario.
+* `POST /api/technicians/create`: Crea un nuevo técnico (`Technician`).
+* `GET /api/technicians/all`: Lista todos los técnicos.
+* `POST /api/orders`: (Nuevo) Crea una nueva orden de trabajo (`WorkOrder`).
+
+---
+
+## Despliegue con Docker
+
+El proyecto incluye un `Dockerfile` optimizado (multi-etapa) para crear una imagen de producción ligera.
+
+1.  **Construir la imagen de Docker:**
     ```sh
     docker build -t telconova-backend .
     ```
